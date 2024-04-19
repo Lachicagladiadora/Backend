@@ -14,6 +14,9 @@ const port = 3000;
 
 app.use(express.json());
 
+const bodyParser = require("body-parser");
+app.use(bodyParser.urlencoded({ extended: false }));
+
 const User = require("./user");
 
 app.get("/", (req, res) => {
@@ -24,57 +27,114 @@ app.listen(port, () => {
   console.log(`server running at http://localhost:${port}`);
 });
 
-const users = [];
+//  MAKE CONNECTION WITH ROUTE FOR NEW USER AND SEND DATA , TEST API
 
-//  #region Create user (POST)
+// const users = [
+//   {
+//     userId: 1,
+//     userName: "Pepito",
+//     email: "pepito@gmail.com",
+//     password: "String",
+//     information: {
+//       gender: "male",
+//       age: 15,
+//       weight: "40",
+//       height: "1.40",
+//       waistCircumference: "60",
+//     },
+//   },
+//   {
+//     userId: 2,
+//     userName: "Juancito",
+//     email: "juan@gmail.com",
+//     password: "String",
+//     information: {
+//       gender: "female",
+//       age: 23,
+//       weight: "45",
+//       height: "1.50",
+//       waistCircumference: "68",
+//     },
+//   },
+// ];
+
+//  #region CRUD user (POST, GET, PUT, DELETE)
 app.post("/user/new", async (req, res) => {
-  const { userName, email } = req.body;
-  if (!userName || !email) {
-    return res.status(400).send("Missing user name or email");
-  }
-  const newUser = new User({
-    userId: users.length + 1,
-    userName,
-    email,
-    password,
+  // const { userName, email, password } = req.body;
+  // if (!userName || !email || !password) {
+  // return res.status(400).send("Missing user name or email");
+  // }
+  let newUser = new User({
+    // userId: 12,
+    userName: req.body.userName,
+    email: req.body.email,
+    password: req.body.password,
     // information: {},
   });
   newUser = await newUser.save();
+  res.send(newUser);
   // users.push(newUser);
-  res.send();
   // .status(200)
   // .send(`Welcome ${userName}, your account was created successfully`);
 });
 
-//  #region Read user (GET)
-app.get("/user/:userId", (req, res) => {
-  const user = users.find((cur) => cur.id === parseInt(req.params.id));
+app.get("/user/:userId", async (req, res) => {
+  const user = await User.findById(req.params.id);
+
   if (!user) {
     return res.status(404).send("User not found");
   }
   res.json(user);
 });
 
-//  #region Update user (PUT)
-app.put("/user/:userId", (req, res) => {
-  const user = users.find((cur) => cur.id === parseInt(req.params.id));
+app.put("/user/:userId", async (req, res) => {
+  const user = await User.findByIdAndUpdate(
+    req.params.id,
+    {
+      userName: req.body.userName,
+      information: {
+        gender: req.body.information.gender,
+        age: req.body.information.age,
+        weight: req.body.information.weight,
+        height: req.body.information.height,
+        waistCircumference: req.body.information.waistCircumference,
+      },
+    },
+    { new: true }
+  );
+
   if (!user) {
     return res.status(404).send("User not found");
   }
-  const { userName, email, information } = req.body;
-  user.userName = userName || user.userName;
-  user.email = email || user.email;
-  user.information = information || user.information;
-
   res.send(user);
+  // const { userName, email, information } = req.body;
+  // user.userName = userName || user.userName;
+  // user.email = email || user.email;
+  // user.information = information || user.information;
 });
 
-//  #region Delete user (DELETE)
-app.delete("/user/:userId", () => {
-  const userId = users.find((cur) => cur.id === parseInt(req.params.id));
+app.delete("/user/:userId", async (req, res) => {
+  const userId = await User.findByIdAndDelete(req.params.id);
   if (!userId) {
     res.status(404).send("User not found");
   }
   users.splice(userId, 1);
   res.status(204).send("user delete successfully");
 });
+
+//  #region CRUD information IMC
+// app.post("/user/:userId", async (req, res) => {
+//   const { weight, height } = req.body;
+//   if (!weight || !height) {
+//     return res.status(400).send("Missing put weight or height");
+//   }
+//   const newInformation = new information({
+//     weight,
+//     height,
+//   });
+//   newInformation = await newInformation.save();
+// });
+
+// how send password and access account
+//  #region Update user (PUT)
+//  #region Delete user (DELETE)
