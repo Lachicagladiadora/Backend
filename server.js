@@ -1,13 +1,29 @@
 const express = require("express");
 const mongoose = require("mongoose");
 
+const USER_DB = "Lachicagladiadora";
+const PASSWORD_DB = "wi4l7KHHdUaNwh1w";
+
+const URI = `mongodb+srv://${USER_DB}:${PASSWORD_DB}@cluster0.7lzt3sn.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
+
+console.log(mongoose.version);
+
 mongoose
   .connect(
-    "mongodb+srv://Lachicagladiadora:<wi4l7KHHdUaNwh1w>@cluster0.7lzt3sn.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0",
-    { userNewUrlParser: true, useUnifiedTopology: true }
+    URI
+    // {
+    //   useNewUrlParser: true,
+    //   useUnifiedTopology: true,
+    //   // useCreateIndex: true,
+    //   useFindAndModify: false,
+    // }
   )
-  .then(() => console.log("Connected to MongoDB ..."))
-  .catch((error) => console.error("Could not connect to MongoDB ...", error));
+  .then(() => {
+    console.log(">. DB connected 🦀");
+  })
+  .catch((err) => {
+    console.log("⚠️", err);
+  });
 
 const app = express();
 const port = 3000;
@@ -66,13 +82,17 @@ app.post("/user/new", async (req, res) => {
   // }
   let newUser = new User({
     // userId: 12,
+
     userName: req.body.userName,
     email: req.body.email,
     password: req.body.password,
     // information: {},
   });
+  console.log("--------------->--------->");
+  // console.log(res);
   newUser = await newUser.save();
   res.send(newUser);
+  console.log({ newUser });
   // users.push(newUser);
   // .status(200)
   // .send(`Welcome ${userName}, your account was created successfully`);
