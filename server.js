@@ -2,11 +2,12 @@ const express = require("express"); //libreria para crear servidores
 const mongoose = require("mongoose"); //libreria para trabajar con mongodb
 const User = require("./user");
 const bodyParser = require("body-parser");
+const cors = require("cors"); // midleware que permite conectar con url externa
 
-const USER_DB = "Lachicagladiadora";
-const PASSWORD_DB = "wi4l7KHHdUaNwh1w";
+const USER_DB = "quintanillaroseny";
+const PASSWORD_DB = "oQzXXD7P5RZsPDXT";
 
-const URI = `mongodb+srv://${USER_DB}:${PASSWORD_DB}@cluster0.7lzt3sn.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
+const URI = `mongodb+srv://${USER_DB}:${PASSWORD_DB}@cluster0.lm3xdo2.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
 console.log(mongoose.version);
 
@@ -24,26 +25,11 @@ const port = 3000;
 
 app.use(express.json()); //permite configurar el midleware(json-> se ejecuta antes de la funcion)
 app.use(bodyParser.urlencoded({ extended: false })); //permite configurar midleware(body parser ->objeto con props)
+app.use(cors()); // por defecto permite conectar solo con url que venga del mismo lugar y no externa, al usasarla damos acceso al exterior
 
 app.get("/", (req, res) => {
   res.send("Hello World");
 });
-
-// let USERS = [
-//   {
-//     userName: "Adela",
-//     email: "aaaa@hotmail.com",
-//     _id: "6626fd15ac9049fde956dd40",
-//     __v: 0,
-//   },
-
-//   {
-//     userName: "Alberto",
-//     email: "alberto@hotmail.com",
-//     _id: "6626fd46ac9049fde956dd42",
-//     __v: 0,
-//   },
-// ];
 
 //  #region CRUD user
 app.post("/user/new", async (req, res) => {
@@ -56,6 +42,15 @@ app.post("/user/new", async (req, res) => {
     newUser = await newUser.save();
 
     res.send(newUser);
+  } catch (error) {
+    res.status(400).send(error.message);
+  }
+});
+
+app.get("/users", async (req, res) => {
+  try {
+    const users = await User.find();
+    res.json(users);
   } catch (error) {
     res.status(400).send(error.message);
   }
@@ -81,13 +76,6 @@ app.put("/user/:userId", async (req, res) => {
       req.params.userId,
       {
         userName: req.body.userName,
-        information: {
-          gender: req.body.information.gender,
-          age: req.body.information.age,
-          weight: req.body.information.weight,
-          height: req.body.information.height,
-          waistCircumference: req.information.waistCircumference,
-        },
       },
       { new: true }
     );
