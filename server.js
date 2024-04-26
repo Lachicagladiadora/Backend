@@ -74,9 +74,7 @@ app.put("/user/:userId", async (req, res) => {
   try {
     const user = await User.findByIdAndUpdate(
       req.params.userId,
-      {
-        userName: req.body.userName,
-      },
+      { userName: req.body.userName },
       { new: true }
     );
 
